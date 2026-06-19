@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Adoption Advisory — Consultant Workbench</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{
+  --emerald:#059669; --emerald-dark:#047857; --emerald-deep:#064e3b; --emerald-light:#ffffff;
+  --gold:#C9A227; --gold-soft:#ffe281; --gold-deep:#d8b337;
+  --sidebar-bg:#064e3b; --sidebar-hover:#065f46; --sidebar-text:#ffffff;
+  --banner-bg:#083c2d; --body-bg:#f4f7f5; --card-bg:#ffffc1;
+  --border:#dfe7e2; --muted:#1b2721; --text:#000000;
+  --green:#059669; --amber:#e1ba58; --red:#cb3939;
+  --bh:54px; --sw:226px;
+}
+*,*::before,*::after{box-sizing:border-box;}
+body{background:var(--body-bg);font-family:'Segoe UI',system-ui,sans-serif;margin:0;color:var(--text);}
+
+.top-banner{background:var(--banner-bg);color:#fff;height:var(--bh);padding:0 22px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:fixed;top:0;left:0;right:0;z-index:200;border-bottom:2px solid var(--gold);}
+.brand{font-weight:700;font-size:.97rem;letter-spacing:.02em;}
+.brand em{color:var(--gold);font-style:normal;}
+.co-tag{font-size:.72rem;color:#a7d8c4;margin-top:2px;}
+.clock{font-size:.75rem;color:#3fab80;text-align:right;line-height:1.5;}
+
+:root{--navbox:#042f22;--navbox-hover:#063f2e;--navbox-border:#0b5a40;}
+.sidebar{background:transparent;width:var(--sw);
+  position:fixed;top:var(--bh);bottom:0;left:0;overflow-y:auto;
+  padding:14px 10px;z-index:100;display:flex;flex-direction:column;gap:11px;}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:#cbd8d1;border-radius:3px;}
+.nav-group{background:var(--navbox);border:1px solid var(--navbox-border);
+  border-radius:13px;padding:7px 6px 9px;box-shadow:0 8px 22px rgba(4,30,20,.28);}
+.s-label{padding:7px 12px 5px;font-size:.66rem;text-transform:uppercase;
+  letter-spacing:.09em;color:#5a9a7e;font-weight:700;user-select:none;}
+.s-link{display:flex;align-items:center;gap:9px;padding:8px 12px;font-size:.84rem;
+  color:var(--sidebar-text);text-decoration:none;border-left:3px solid transparent;
+  border-radius:8px;margin:0 2px;cursor:pointer;transition:all .12s;user-select:none;}
+.s-link:hover{background:var(--navbox-hover);color:#fff;}
+.s-link.active{background:var(--navbox-hover);color:#fff;border-left-color:var(--gold);}
+.s-link i{width:15px;text-align:center;font-size:.82rem;}
+.s-link .pill{margin-left:auto;background:var(--gold);color:#053b2c;font-size:.62rem;
+  font-weight:700;border-radius:10px;padding:0 6px;}
+.sidebar-foot{background:var(--navbox);border:1px solid var(--navbox-border);
+  border-radius:13px;padding:12px 14px;margin-top:auto;box-shadow:0 8px 22px rgba(4,30,20,.28);}
+.sidebar-foot small{color:#a2d1bc;font-size:.7rem;}
+
+.main-wrap{margin-left:var(--sw);margin-top:var(--bh);padding:26px 30px;min-height:calc(100vh - var(--bh));}
+.view{display:none;}.view.active{display:block;}
+
+.ph{margin-bottom:22px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;}
+.ph h2{font-size:1.4rem;font-weight:700;margin:0;color:var(--emerald-deep);}
+.ph p{color:var(--muted);margin:3px 0 0;font-size:.85rem;}
+
+.btn-primary{background:var(--emerald);border-color:var(--emerald);}
+.btn-primary:hover{background:var(--emerald-dark);border-color:var(--emerald-dark);}
+.btn-outline-primary{color:var(--emerald-dark);border-color:var(--emerald);}
+.btn-outline-primary:hover{background:var(--emerald);border-color:var(--emerald);}
+.btn-gold{background:var(--gold);border-color:var(--gold);color:#053b2c;font-weight:600;}
+.btn-gold:hover{background:var(--gold-deep);border-color:var(--gold-deep);color:#fff;}
+.text-primary{color:var(--emerald)!important;}
+
+.card-p{background:#fff;border:1px solid var(--border);border-radius:10px;}
+.ch{padding:12px 16px;border-bottom:1px solid var(--border);font-weight:600;font-size:.88rem;
+  display:flex;align-items:center;justify-content:space-between;color:var(--emerald-deep);}
+.cb{padding:16px;}
+
+.kpi{background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px 16px;position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--emerald);}
+.kpi.gold::before{background:var(--gold);}
+.kv{font-size:1.9rem;font-weight:700;line-height:1;color:var(--emerald-deep);}
+.kl{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-top:5px;}
+.ks{font-size:.76rem;color:var(--muted);margin-top:3px;}
+.kg{color:var(--green);} .ko{color:var(--amber);} .kr{color:var(--red);}
+
+.badge-st{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.73rem;font-weight:600;}
+.st-active,.st-responded,.st-sent{background:#d1fae5;color:#065f46;}
+.st-opened,.st-planner,.st-progress{background:#fef3c7;color:#92400e;}
+.st-draft,.st-noresponse,.st-non-adopter,.st-closed,.st-paused{background:#f1f5f9;color:#475569;}
+.st-current-user{background:#d1fae5;color:#065f46;}
+
+.tl{display:inline-flex;align-items:center;gap:5px;font-size:.74rem;font-weight:600;}
+.tl-dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+.tl-ahead .tl-dot{background:var(--green);} .tl-ahead{color:var(--green);}
+.tl-at .tl-dot{background:var(--amber);} .tl-at{color:var(--amber);}
+.tl-behind .tl-dot{background:var(--red);} .tl-behind{color:var(--red);}
+
+.score-chip{display:inline-flex;align-items:center;justify-content:center;min-width:38px;
+  padding:2px 8px;border-radius:20px;font-weight:700;font-size:.8rem;color:#fff;}
+
+.table{font-size:.83rem;}.table th{font-size:.71rem;text-transform:uppercase;
+  letter-spacing:.04em;color:var(--muted);font-weight:600;background:#eef4f0;}
+.table-hover tbody tr:hover{background:var(--emerald-light);}
+
+.form-label-sm{font-size:.78rem;font-weight:600;margin-bottom:3px;}
+.form-control:focus,.form-select:focus{border-color:var(--emerald);box-shadow:0 0 0 .2rem rgba(5,150,105,.18);}
+
+.svc{background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px;height:100%;
+  border-top:3px solid var(--gold);transition:all .15s;}
+.svc:hover{box-shadow:0 6px 18px rgba(6,78,59,.1);transform:translateY(-2px);}
+.svc h5{font-size:1rem;font-weight:700;color:var(--emerald-deep);margin-bottom:4px;}
+.svc .price{font-size:1.3rem;font-weight:700;color:var(--gold-deep);}
+
+.funnel-step{display:flex;align-items:center;gap:14px;margin-bottom:8px;}
+.funnel-bar{height:34px;border-radius:6px;display:flex;align-items:center;padding:0 12px;
+  color:#fff;font-weight:600;font-size:.84rem;min-width:60px;transition:width .4s;}
+.funnel-meta{font-size:.78rem;color:var(--muted);white-space:nowrap;}
+
+#toast-area{position:fixed;bottom:18px;right:18px;z-index:999;display:flex;flex-direction:column;gap:7px;}
+.t-msg{background:var(--emerald-deep);color:#fff;padding:9px 14px;border-radius:7px;
+  font-size:.82rem;box-shadow:0 4px 12px rgba(0,0,0,.2);animation:tIn .18s ease;}
+.t-msg.success{border-left:3px solid var(--gold);} .t-msg.error{border-left:3px solid var(--red);}
+.t-msg.info{border-left:3px solid #38bdf8;}
+@keyframes tIn{from{opacity:0;transform:translateX(16px);}to{opacity:1;transform:translateX(0);}}
+
+.prog-sm{height:6px;border-radius:3px;background:#e2e8f0;overflow:hidden;}
+.prog-sm div{height:6px;border-radius:3px;background:var(--emerald);}
+
+.stat-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;
+  background:#fff;border:1px solid var(--border);border-radius:20px;font-size:.76rem;}
+.stat-pill b{color:var(--emerald-deep);}
+
+.run-banner{position:fixed;left:0;right:0;bottom:0;height:36px;background:var(--banner-bg);
+  border-top:2px solid var(--gold);display:flex;align-items:center;justify-content:center;overflow:hidden;z-index:250;}
+.run-banner .track{white-space:nowrap;color:#fff;font-size:.94rem;font-weight:500;letter-spacing:.04em;}
+.run-banner .track b{color:var(--gold);font-weight:700;}
+.sidebar{bottom:38px;}
+.main-wrap{padding-bottom:52px;}
+
+@media print{.sidebar,.top-banner,.run-banner,.no-print{display:none!important;}
+  .main-wrap{margin:0;padding:0;}}
+</style>
+</head>
+<body>
+
+<div class="top-banner">
+  <div>
+    <div class="brand">Adoption <em>Advisory</em> Workbench</div>
+    <div class="co-tag"><i class="fas fa-robot me-1"></i>AI &amp; Digital Adoption Consultancy &nbsp;·&nbsp; Client Operations Hub</div>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <span class="badge" style="background:var(--gold);color:#053b2c;font-size:.65rem;"><i class="fas fa-circle me-1" style="font-size:.5rem;"></i>Live</span>
+    <span class="badge bg-light text-dark" style="font-size:.65rem;"><i class="fas fa-lock me-1"></i>Local Only</span>
+    <div class="clock"><div id="clock-date"></div><div id="clock-time"></div></div>
+  </div>
+</div>
+
+<nav class="sidebar">
+  <div class="nav-group">
+    <div class="s-label">Overview</div>
+    <a class="s-link active" data-view="dashboard" onclick="nav('dashboard')">Dashboard</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="s-label">Practice</div>
+    <a class="s-link" data-view="services" onclick="nav('services')">Services Management</a>
+    <a class="s-link" data-view="customers" onclick="nav('customers')">Customer Database <span class="pill" id="pill-cust">0</span></a>
+  </div>
+
+  <div class="nav-group">
+    <div class="s-label">Outreach</div>
+    <a class="s-link" data-view="emails" onclick="nav('emails')">Email Management</a>
+    <a class="s-link" data-view="tracking" onclick="nav('tracking')">Response Tracking</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="s-label">Insights</div>
+    <a class="s-link" data-view="insights" onclick="nav('insights')">Adoption Insights</a>
+    <a class="s-link" data-view="support" onclick="nav('support')">Govt Support &amp; Direction</a>
+  </div>
+
+  <div class="sidebar-foot">
+    <small><i class="fas fa-database me-1"></i><span id="sb-stats">Loading…</span></small>
+  </div>
+</nav>
+
+<div class="main-wrap">
+
+<section id="view-dashboard" class="view active">
+  <div class="ph">
+    <div><h2></i>Dashboard</h2>
+    <p>Outreach, response and client portfolio overview</p></div>
+    <button class="btn btn-sm btn-gold no-print" onclick="seedDemo()"><i class="fas fa-seedling me-1"></i>Load Demo Data</button>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3"><div class="kpi"><div class="kv" id="kpi-sent">0</div><div class="kl">Scan Emails Sent</div><div class="ks" id="kpi-sent-sub">0 this week</div></div></div>
+    <div class="col-6 col-lg-3"><div class="kpi gold"><div class="kv" id="kpi-resprate">0%</div><div class="kl">Response Rate</div><div class="ks" id="kpi-resprate-sub">0 of 0 responded</div></div></div>
+    <div class="col-6 col-lg-3"><div class="kpi"><div class="kv" id="kpi-active">0</div><div class="kl">Active Customers</div><div class="ks" id="kpi-active-sub">0 closed</div></div></div>
+    <div class="col-6 col-lg-3"><div class="kpi gold"><div class="kv" id="kpi-score">0</div><div class="kl">Avg Adoption Score</div><div class="ks" id="kpi-score-sub">across active clients</div></div></div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-lg-5"><div class="card-p"><div class="ch"><span id="outreach-title">Scan Outreach — Last 7 Days</span>
+      <select class="form-select form-select-sm" style="width:auto;font-size:.75rem;padding:2px 24px 2px 8px;" id="outreach-range" onchange="outreachChart()">
+        <option value="7d">7 Days</option><option value="month">Month</option><option value="year">Year</option>
+      </select></div><div class="cb"><canvas id="chart-outreach" height="200"></canvas></div></div></div>
+    <div class="col-lg-3"><div class="card-p h-100"><div class="ch">Customers by State</div><div class="cb" style="display:flex;align-items:center;justify-content:center;min-height:200px;"><canvas id="chart-state" width="180" height="180"></canvas></div></div></div>
+    <div class="col-lg-4"><div class="card-p h-100"><div class="ch">Client Adoption vs Sector Benchmark</div><div class="cb"><canvas id="chart-bench-mini" height="200"></canvas></div></div></div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-8"><div class="card-p"><div class="ch">Recent Activity <a class="btn btn-sm btn-outline-primary" style="font-size:.72rem;padding:1px 8px;" onclick="nav('tracking')">Tracking</a></div>
+      <div class="table-responsive"><table class="table table-hover mb-0">
+        <thead><tr><th>When</th><th>Customer</th><th>Service</th><th>Stage</th><th>Sector</th></tr></thead>
+        <tbody id="dash-activity"></tbody></table></div></div></div>
+    <div class="col-lg-4"><div class="card-p"><div class="ch">Awaiting Response</div><div class="cb" id="dash-awaiting" style="font-size:.83rem;"></div></div></div>
+  </div>
+</section>
+
+<section id="view-services" class="view">
+  <div class="ph">
+    <div><h2></i>Services Management</h2>
+    <p>Advisory products the practice sells to SME clients</p></div>
+    <button class="btn btn-sm btn-primary no-print" data-bs-toggle="collapse" data-bs-target="#new-svc-form"><i class="fas fa-plus me-1"></i>Add Service</button>
+  </div>
+  <div class="collapse mb-3" id="new-svc-form"><div class="card-p cb"><form onsubmit="addService(event)"><div class="row g-2">
+    <div class="col-sm-3"><label class="form-label-sm">Name</label><input class="form-control form-control-sm" id="sv-name" required></div>
+    <div class="col-sm-4"><label class="form-label-sm">Description</label><input class="form-control form-control-sm" id="sv-desc"></div>
+    <div class="col-sm-2"><label class="form-label-sm">Duration</label><input class="form-control form-control-sm" id="sv-dur" placeholder="e.g. 2 weeks"></div>
+    <div class="col-sm-2"><label class="form-label-sm">Price (£)</label><input type="number" class="form-control form-control-sm" id="sv-price" min="0"></div>
+    <div class="col-sm-1 d-flex align-items-end"><button class="btn btn-primary btn-sm w-100">Add</button></div>
+  </div></form></div></div>
+  <div class="row g-3" id="svc-grid"></div>
+</section>
+
+<section id="view-customers" class="view">
+  <div class="ph">
+    <div><h2></i>Customer Database</h2>
+    <p>SME clients with sector, size band and AI adoption state — active and closed engagements</p></div>
+    <div class="d-flex gap-2 no-print">
+      <button class="btn btn-sm btn-primary" data-bs-toggle="collapse" data-bs-target="#new-cust-form"><i class="fas fa-plus me-1"></i>Add Customer</button>
+      <button class="btn btn-sm btn-gold" onclick="exportExcel('customers')"><i class="fas fa-file-excel me-1"></i>Export</button>
+    </div>
+  </div>
+  <div class="collapse mb-3" id="new-cust-form"><div class="card-p cb"><form onsubmit="addCustomer(event)"><div class="row g-2">
+    <div class="col-sm-3"><label class="form-label-sm">Company</label><input class="form-control form-control-sm" id="cu-name" required></div>
+    <div class="col-sm-3"><label class="form-label-sm">Contact email</label><input type="email" class="form-control form-control-sm" id="cu-email" required></div>
+    <div class="col-sm-3"><label class="form-label-sm">Sector</label><select class="form-select form-select-sm" id="cu-sector"></select></div>
+    <div class="col-sm-2"><label class="form-label-sm">Size band</label><select class="form-select form-select-sm" id="cu-size"><option>Micro</option><option>Small</option><option>Mid</option><option>Large</option></select></div>
+    <div class="col-sm-1 d-flex align-items-end"><button class="btn btn-primary btn-sm w-100">Add</button></div>
+  </div></form></div></div>
+  <div class="d-flex gap-2 mb-3 flex-wrap">
+    <input class="form-control form-control-sm" style="width:220px;" placeholder="Search customers…" oninput="renderCustomers()" id="cust-search">
+    <select class="form-select form-select-sm" style="width:150px;" onchange="renderCustomers()" id="cust-filter-status"><option value="">All engagements</option><option>Active</option><option>Closed</option></select>
+    <select class="form-select form-select-sm" style="width:160px;" onchange="renderCustomers()" id="cust-filter-state"><option value="">All adoption states</option><option>Current user</option><option>Planner</option><option>Non-adopter</option></select>
+    <select class="form-select form-select-sm" style="width:200px;" onchange="renderCustomers()" id="cust-filter-sector"></select>
+  </div>
+  <div class="card-p"><div class="table-responsive"><table class="table table-hover mb-0">
+    <thead><tr><th>Company</th><th>Sector</th><th>Size</th><th>Adoption State</th><th>Score</th><th>vs Sector</th><th>Engagement</th><th class="no-print"></th></tr></thead>
+    <tbody id="cust-tbody"></tbody></table></div></div>
+</section>
+
+<section id="view-emails" class="view">
+  <div class="ph">
+    <div><h2></i>Email Management</h2>
+    <p>Send AI Readiness Scan invitations to customers and track each one's lifecycle</p></div>
+    <button class="btn btn-sm btn-gold no-print" onclick="exportExcel('invites')"><i class="fas fa-file-excel me-1"></i>Export</button>
+  </div>
+  <div class="row g-3">
+    <div class="col-lg-4">
+      <div class="card-p"><div class="ch">Compose Invite</div><div class="cb"><form onsubmit="sendInvite(event)">
+        <label class="form-label-sm">Customer</label><select class="form-select form-select-sm mb-2" id="em-cust" onchange="onPickCust()" required></select>
+        <label class="form-label-sm">Service</label><select class="form-select form-select-sm mb-2" id="em-svc"></select>
+        <label class="form-label-sm">Subject</label><input class="form-control form-control-sm mb-2" id="em-subj" value="Your complimentary AI Readiness Analysis">
+        <label class="form-label-sm">Message</label><textarea class="form-control form-control-sm mb-2" id="em-body" rows="4">Hi there,
+
+We'd like to offer your team a 10-minute AI Readiness Analysis to benchmark you against your sector. Click below to begin.</textarea>
+        <div class="d-flex gap-2"><button class="btn btn-primary btn-sm flex-fill" type="submit"><i class="fas fa-paper-plane me-1"></i>Send Invite</button>
+        <button class="btn btn-outline-primary btn-sm" type="button" onclick="saveDraft()">Save Draft</button></div>
+      </form></div></div>
+    </div>
+    <div class="col-lg-8">
+      <div class="d-flex gap-2 mb-3 flex-wrap" id="email-pills"></div>
+      <div class="card-p"><div class="ch">Sent &amp; Drafts</div><div class="table-responsive"><table class="table table-hover mb-0">
+        <thead><tr><th>Customer</th><th>Subject</th><th>Service</th><th>Sent</th><th>Stage</th><th class="no-print">Simulate</th></tr></thead>
+        <tbody id="emails-tbody"></tbody></table></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="view-tracking" class="view">
+  <div class="ph"><div><h2></i>Response Tracking</h2>
+    <p>The invite funnel: Sent → Opened → Responded — and who still needs a nudge</p></div></div>
+  <div class="row g-3 mb-4">
+    <div class="col-lg-5"><div class="card-p"><div class="ch">Conversion Funnel</div><div class="cb" id="funnel"></div></div></div>
+    <div class="col-lg-7"><div class="card-p"><div class="ch">Responses by Sector</div><div class="cb"><canvas id="chart-resp-sector" height="220"></canvas></div></div></div>
+  </div>
+  <div class="card-p"><div class="ch">All Invites</div><div class="table-responsive"><table class="table table-hover mb-0">
+    <thead><tr><th>Customer</th><th>Sector</th><th>Sent</th><th>Responded</th><th>Days</th><th>Stage</th><th>Scan Score</th></tr></thead>
+    <tbody id="track-tbody"></tbody></table></div></div>
+</section>
+
+<section id="view-insights" class="view">
+  <div class="ph"><div><h2></i>Adoption Insights</h2>
+    <p>Client portfolio benchmarked against UK AI adoption research by sector</p></div></div>
+  <div class="row g-3 mb-4" id="insights-kpis"></div>
+  <div class="row g-3 mb-4">
+    <div class="col-lg-7"><div class="card-p"><div class="ch">Client Adoption vs Sector Benchmark</div><div class="cb"><canvas id="chart-bench" height="230"></canvas></div></div></div>
+    <div class="col-lg-5"><div class="card-p"><div class="ch">AI Technology Mix (clients)</div><div class="cb"><canvas id="chart-tech" height="230"></canvas></div></div></div>
+  </div>
+  <div class="row g-3">
+    <div class="col-lg-6"><div class="card-p"><div class="ch">Top Adoption Barriers</div><div class="cb"><canvas id="chart-barriers" height="200"></canvas></div></div></div>
+    <div class="col-lg-6"><div class="card-p"><div class="ch">Readiness to Scale</div><div class="cb" id="readiness-scores"></div></div></div>
+  </div>
+  <div class="text-muted mt-3" style="font-size:.74rem;"><i class="fas fa-circle-info me-1"></i>Benchmarks: UK AI Adoption Research (gov.uk, 2025). Illustrative figures for demonstration.</div>
+</section>
+
+<section id="view-support" class="view">
+  <div class="ph"><div><h2></i>Govt Support &amp; Direction</h2>
+    <p>Where each client sits on the policy-development path, and the publicly-available support at each phase</p></div></div>
+
+  <div class="card-p mb-4"><div class="cb" style="font-size:.85rem;color:var(--muted);">
+    <i class="fas fa-compass text-primary me-1"></i> Mapped to the <strong>Open Policy Making</strong> four-phase model (gov.uk).
+  </div></div>
+
+  <div class="row g-3 mb-4" id="phase-cards"></div>
+
+  <div class="row g-3">
+    <div class="col-lg-6"><div class="card-p"><div class="ch">Portfolio Across Policy Phases</div><div class="cb"><canvas id="chart-phases" height="210"></canvas></div></div></div>
+    <div class="col-lg-6"><div class="card-p"><div class="ch">Recommended Direction by Client</div>
+      <div class="table-responsive"><table class="table table-hover mb-0">
+        <thead><tr><th>Client</th><th>Score</th><th>Phase</th><th>Recommended Support</th></tr></thead>
+        <tbody id="support-tbody"></tbody></table></div></div></div>
+  </div>
+  <div class="text-muted mt-3" style="font-size:.74rem;"><i class="fas fa-circle-info me-1"></i>Framework: Open Policy Making Toolkit (gov.uk). Methods shown are illustrative mappings for demonstration.</div>
+</section>
+
+</div><!-- /main-wrap -->
+
+<div class="run-banner">
+  <div class="track">Refactored Workbench based on Micro-Internship with <b>Fit-Design BV (Belgium)</b></div>
+</div>
+
+<div id="toast-area"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+'use strict';
+
+var SECTORS = ['Information & Communication','Business Services','Finance & Real Estate','Manufacturing','Construction','Retail & Distribution','Transport & Logistics','Hotel & Catering','Other'];
+var BENCH = {'Information & Communication':43,'Business Services':23,'Finance & Real Estate':21,'Manufacturing':18,'Construction':14,'Retail & Distribution':13,'Transport & Logistics':12,'Hotel & Catering':12,'Other':16};
+var TECHS = ['Machine Learning','NLP','Computer Vision','Agentic AI'];
+var BARRIERS = [['No identified need',71],['Skills gap',60],['Lack of tools',48],['Cost',38],['Unclear regulation',34],['Ethical concerns',30]];
+var PHASES = [
+  {name:'Diagnosis', icon:'fa-magnifying-glass', max:24, color:'#dc2626',
+    desc:'Frame the core problem and where AI could matter.',
+    support:'Problem-definition workshops · Low-cost diagnostic methods'},
+  {name:'Discovery', icon:'fa-users-viewfinder', max:44, color:'#d4a017',
+    desc:'Research user needs and the affected operations.',
+    support:'User research guides · Sector benchmark evidence'},
+  {name:'Development', icon:'fa-screwdriver-wrench', max:64, color:'#34b97f',
+    desc:'Turn insight into testable AI use-case ideas.',
+    support:'24-hour rapid workshops · Collaborative prototyping'},
+  {name:'Delivery', icon:'fa-rocket', max:101, color:'#059669',
+    desc:'Move from prototype to scaled implementation.',
+    support:'Delivery playbooks · Scaling & governance protocols'}
+];
+function phaseFor(score){ for(var i=0;i<PHASES.length;i++){ if(score<PHASES[i].max) return i; } return PHASES.length-1; }
+
+var services  = lsGet('aaa_services', []);
+var customers = lsGet('aaa_customers', []);
+var invites   = lsGet('aaa_invites', []);
+var charts    = {};
+
+function lsGet(k,def){ try{var v=localStorage.getItem(k);return v?JSON.parse(v):def;}catch(e){return def;} }
+function lsSave(){
+  localStorage.setItem('aaa_services',  JSON.stringify(services));
+  localStorage.setItem('aaa_customers', JSON.stringify(customers));
+  localStorage.setItem('aaa_invites',   JSON.stringify(invites));
+}
+function updateSbStats(){
+  var active = customers.filter(function(c){return c.status==='Active';}).length;
+  var sent = invites.filter(function(i){return i.stage!=='Draft';}).length;
+  var el=document.getElementById('sb-stats'); if(el) el.textContent = active+' active clients · '+sent+' scans sent';
+  var p=document.getElementById('pill-cust'); if(p) p.textContent = customers.length;
+}
+
+function nav(id){
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
+  document.querySelectorAll('.s-link').forEach(function(a){a.classList.remove('active');});
+  var v=document.getElementById('view-'+id); if(v) v.classList.add('active');
+  var l=document.querySelector('.s-link[data-view="'+id+'"]'); if(l) l.classList.add('active');
+  ({dashboard:renderDashboard,services:renderServices,customers:renderCustomers,emails:renderEmails,tracking:renderTracking,insights:renderInsights,support:renderSupport}[id]||function(){})();
+}
+
+function tickClock(){
+  var n=new Date();
+  var de=document.getElementById('clock-date'), te=document.getElementById('clock-time');
+  if(de) de.textContent=n.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  if(te) te.textContent=n.toLocaleTimeString('en-GB');
+}
+setInterval(tickClock,1000); tickClock();
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function toast(msg,type){var a=document.getElementById('toast-area');var d=document.createElement('div');d.className='t-msg '+(type||'success');d.textContent=msg;a.appendChild(d);setTimeout(function(){d.remove();},3200);}
+function fmtMoney(n){return '£'+parseFloat(n||0).toLocaleString('en-GB');}
+function fmtDate(d){return d?String(d).slice(0,10):'—';}
+function today(){return new Date().toISOString().slice(0,10);}
+function nowTs(){return new Date().toISOString();}
+function uid(){return Date.now()+Math.floor(Math.random()*9999);}
+function daysBetween(d1,d2){return Math.round((new Date(d2||today())-new Date(d1))/86400000);}
+function slug(s){return String(s||'').toLowerCase().replace(/[^a-z]+/g,'-');}
+function stBadge(s){return '<span class="badge-st st-'+slug(s)+'">'+esc(s)+'</span>';}
+function scoreColor(n){return n>=60?'#059669':n>=35?'#d4a017':'#dc2626';}
+function scoreChip(n){return '<span class="score-chip" style="background:'+scoreColor(n)+'">'+n+'</span>';}
+function mkChart(id,cfg){if(charts[id]){charts[id].destroy();delete charts[id];}var c=document.getElementById(id);if(!c)return;charts[id]=new Chart(c.getContext('2d'),cfg);}
+
+function calcScore(c){
+  var techScore = (c.techs?c.techs.length:0)/TECHS.length*100;
+  return Math.round(0.4*(c.usagePct||0) + 0.25*(c.staffPct||0) + 0.2*techScore + 0.15*(c.readiness||0));
+}
+function vsBench(c){
+  var b = BENCH[c.sector]||16, u = c.usagePct||0, diff = u-b;
+  if(diff >= 5) return {cls:'tl-ahead',label:'Ahead +'+diff,diff:diff};
+  if(diff <= -5) return {cls:'tl-behind',label:'Behind '+diff,diff:diff};
+  return {cls:'tl-at',label:'At sector',diff:diff};
+}
+function tlBadge(c){var t=vsBench(c);return '<span class="tl '+t.cls+'"><span class="tl-dot"></span>'+t.label+'</span>';}
+function custById(id){return customers.find(function(c){return c.id===id;});}
+
+function renderDashboard(){
+  var sent = invites.filter(function(i){return i.stage!=='Draft';});
+  var responded = invites.filter(function(i){return i.stage==='Responded';});
+  var weekAgo = new Date(Date.now()-7*864e5).toISOString();
+  document.getElementById('kpi-sent').textContent = sent.length;
+  document.getElementById('kpi-sent-sub').textContent = sent.filter(function(i){return i.sentTs>weekAgo;}).length+' this week';
+  var rate = sent.length? Math.round(responded.length/sent.length*100):0;
+  document.getElementById('kpi-resprate').textContent = rate+'%';
+  document.getElementById('kpi-resprate-sub').textContent = responded.length+' of '+sent.length+' responded';
+  var active = customers.filter(function(c){return c.status==='Active';});
+  document.getElementById('kpi-active').textContent = active.length;
+  document.getElementById('kpi-active-sub').textContent = customers.filter(function(c){return c.status==='Closed';}).length+' closed';
+  var scored = active.filter(function(c){return c.scored;});
+  var avg = scored.length? Math.round(scored.reduce(function(s,c){return s+calcScore(c);},0)/scored.length):0;
+  document.getElementById('kpi-score').textContent = avg;
+
+  var acts = invites.filter(function(i){return i.stage!=='Draft';}).slice().sort(function(a,b){return new Date(b.sentTs)-new Date(a.sentTs);}).slice(0,8);
+  var tb=document.getElementById('dash-activity');
+  tb.innerHTML = acts.length? acts.map(function(i){var c=custById(i.customerId)||{};
+    return '<tr><td style="white-space:nowrap;font-size:.76rem;">'+esc(String(i.sentTs||'').slice(0,16).replace('T',' '))+'</td><td>'+esc(i.customerName)+'</td><td style="font-size:.79rem;">'+esc(i.service||'—')+'</td><td>'+stBadge(i.stage)+'</td><td style="font-size:.78rem;">'+esc(c.sector||'—')+'</td></tr>';
+  }).join('') : '<tr><td colspan="5" class="text-center text-muted py-4">No outreach yet. Load demo data to begin.</td></tr>';
+
+  var wait = invites.filter(function(i){return i.stage==='Sent'||i.stage==='Opened';});
+  var aw=document.getElementById('dash-awaiting');
+  aw.innerHTML = wait.length? wait.slice(0,6).map(function(i){
+    return '<div class="d-flex justify-content-between align-items-center mb-2"><div><strong>'+esc(i.customerName)+'</strong><div class="text-muted" style="font-size:.74rem;">'+daysBetween(i.sentTs)+'d ago</div></div>'+stBadge(i.stage)+'</div>';
+  }).join('') : '<div class="text-muted text-center py-3">Nothing awaiting response.</div>';
+
+  outreachChart(); stateChart(); benchMiniChart();
+}
+function outreachChart(){
+  var range=(document.getElementById('outreach-range')||{}).value||'7d';
+  var titleEl=document.getElementById('outreach-title');
+  var labels=[],sentD=[],respD=[];
+  if(range==='year'){
+    for(var m=11;m>=0;m--){var dm=new Date();dm.setDate(1);dm.setMonth(dm.getMonth()-m);var ym=dm.toISOString().slice(0,7);
+      labels.push(dm.toLocaleDateString('en-GB',{month:'short'}));
+      sentD.push(invites.filter(function(x){return x.stage!=='Draft'&&String(x.sentTs||'').slice(0,7)===ym;}).length);
+      respD.push(invites.filter(function(x){return x.stage==='Responded'&&String(x.respondedTs||'').slice(0,7)===ym;}).length);}
+    if(titleEl) titleEl.textContent='Scan Outreach — Last 12 Months';
+  } else {
+    var n=range==='month'?30:7;
+    for(var i=n-1;i>=0;i--){var d=new Date();d.setDate(d.getDate()-i);var ds=d.toISOString().slice(0,10);
+      labels.push(range==='month'?d.toLocaleDateString('en-GB',{day:'numeric',month:'short'}):d.toLocaleDateString('en-GB',{weekday:'short'}));
+      sentD.push(invites.filter(function(x){return x.stage!=='Draft'&&fmtDate(x.sentTs)===ds;}).length);
+      respD.push(invites.filter(function(x){return x.stage==='Responded'&&fmtDate(x.respondedTs)===ds;}).length);}
+    if(titleEl) titleEl.textContent='Scan Outreach — '+(range==='month'?'Last 30 Days':'Last 7 Days');
+  }
+  mkChart('chart-outreach',{type:'bar',data:{labels:labels,datasets:[
+    {label:'Sent',data:sentD,backgroundColor:'#059669',borderRadius:3},
+    {label:'Responded',data:respD,backgroundColor:'#C9A227',borderRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{stepSize:1}}}}});
+}
+function stateChart(){
+  var states=['Current user','Planner','Non-adopter'];
+  var counts=states.map(function(s){return customers.filter(function(c){return c.state===s;}).length;});
+  mkChart('chart-state',{type:'doughnut',data:{labels:states,datasets:[{data:counts,backgroundColor:['#059669','#C9A227','#cbd5e1'],borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:12}}}}});
+}
+function benchMiniChart(){
+  var active=customers.filter(function(c){return c.status==='Active'&&c.scored;});
+  var bySec={}; active.forEach(function(c){(bySec[c.sector]=bySec[c.sector]||[]).push(c.usagePct||0);});
+  var labels=Object.keys(bySec), client=labels.map(function(s){return Math.round(bySec[s].reduce(function(a,b){return a+b;},0)/bySec[s].length);}), bench=labels.map(function(s){return BENCH[s];});
+  mkChart('chart-bench-mini',{type:'bar',data:{labels:labels.map(function(l){return l.split(' ')[0];}),datasets:[
+    {label:'Client',data:client,backgroundColor:'#059669',borderRadius:3},
+    {label:'Sector',data:bench,backgroundColor:'#F3E7BE',borderRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{beginAtZero:true,max:60,ticks:{callback:function(v){return v+'%';}}}}}});
+}
+
+function addService(e){e.preventDefault();
+  services.push({id:uid(),name:document.getElementById('sv-name').value.trim(),desc:document.getElementById('sv-desc').value.trim(),dur:document.getElementById('sv-dur').value.trim(),price:document.getElementById('sv-price').value||0,active:true});
+  lsSave();e.target.reset();toast('Service added');renderServices();
+}
+function delService(id){services=services.filter(function(s){return s.id!==id;});lsSave();renderServices();toast('Service removed','info');}
+function renderServices(){
+  var g=document.getElementById('svc-grid');
+  if(!services.length){g.innerHTML='<div class="col-12 text-center text-muted py-5">No services yet. Add one, or load demo data.</div>';return;}
+  g.innerHTML=services.map(function(s){
+    return '<div class="col-md-6 col-lg-4"><div class="svc"><div class="d-flex justify-content-between"><h5>'+esc(s.name)+'</h5>'+
+      '<button class="btn-close no-print" style="font-size:.6rem;" onclick="delService('+s.id+')"></button></div>'+
+      '<p class="text-muted" style="font-size:.83rem;min-height:38px;">'+esc(s.desc||'')+'</p>'+
+      '<div class="d-flex justify-content-between align-items-center"><span class="price">'+fmtMoney(s.price)+'</span>'+
+      '<span class="stat-pill"><i class="fas fa-clock"></i>'+esc(s.dur||'—')+'</span></div></div></div>';
+  }).join('');
+  fillServiceSelects();
+}
+function fillServiceSelects(){var sel=document.getElementById('em-svc');if(sel)sel.innerHTML=services.map(function(s){return '<option>'+esc(s.name)+'</option>';}).join('');}
+
+function fillSectorSelects(){
+  ['cu-sector'].forEach(function(id){var el=document.getElementById(id);if(el)el.innerHTML=SECTORS.map(function(s){return '<option>'+esc(s)+'</option>';}).join('');});
+  var f=document.getElementById('cust-filter-sector');if(f)f.innerHTML='<option value="">All sectors</option>'+SECTORS.map(function(s){return '<option>'+esc(s)+'</option>';}).join('');
+}
+function addCustomer(e){e.preventDefault();
+  customers.push({id:uid(),name:document.getElementById('cu-name').value.trim(),email:document.getElementById('cu-email').value.trim(),
+    sector:document.getElementById('cu-sector').value,size:document.getElementById('cu-size').value,
+    state:'Non-adopter',status:'Active',scored:false,usagePct:0,staffPct:0,techs:[],readiness:0,createdTs:nowTs()});
+  lsSave();e.target.reset();fillSectorSelects();toast('Customer added');renderCustomers();updateSbStats();
+}
+function toggleStatus(id){var c=custById(id);if(!c)return;c.status=c.status==='Active'?'Closed':'Active';lsSave();renderCustomers();updateSbStats();toast(c.name+' → '+c.status,'info');}
+function delCustomer(id){customers=customers.filter(function(c){return c.id!==id;});lsSave();renderCustomers();updateSbStats();toast('Customer removed','info');}
+function renderCustomers(){
+  var q=(document.getElementById('cust-search')?.value||'').toLowerCase();
+  var fst=document.getElementById('cust-filter-status')?.value||'';
+  var fstate=document.getElementById('cust-filter-state')?.value||'';
+  var fsec=document.getElementById('cust-filter-sector')?.value||'';
+  var rows=customers.filter(function(c){return (!q||(c.name+c.sector).toLowerCase().includes(q))&&(!fst||c.status===fst)&&(!fstate||c.state===fstate)&&(!fsec||c.sector===fsec);});
+  var tb=document.getElementById('cust-tbody');
+  if(!rows.length){tb.innerHTML='<tr><td colspan="8" class="text-center text-muted py-4">No customers found.</td></tr>';return;}
+  tb.innerHTML=rows.map(function(c){var sc=c.scored?calcScore(c):null;
+    return '<tr'+(c.status==='Closed'?' style="opacity:.55;"':'')+'><td><strong>'+esc(c.name)+'</strong><div class="text-muted" style="font-size:.72rem;">'+esc(c.email)+'</div></td>'+
+      '<td style="font-size:.79rem;">'+esc(c.sector)+'</td><td>'+esc(c.size)+'</td><td>'+stBadge(c.state)+'</td>'+
+      '<td>'+(sc!==null?scoreChip(sc):'<span class="text-muted">—</span>')+'</td>'+
+      '<td>'+(c.scored?tlBadge(c):'<span class="text-muted">—</span>')+'</td>'+
+      '<td>'+stBadge(c.status)+'</td>'+
+      '<td class="no-print" style="white-space:nowrap;"><button class="btn btn-sm btn-outline-primary" style="font-size:.68rem;padding:1px 7px;" onclick="toggleStatus('+c.id+')">'+(c.status==='Active'?'Close':'Reopen')+'</button> '+
+      '<button class="btn btn-sm btn-outline-danger" style="font-size:.68rem;padding:1px 7px;" onclick="delCustomer('+c.id+')"><i class="fas fa-trash"></i></button></td></tr>';
+  }).join('');
+  updateSbStats();
+}
+
+function fillCustSelect(){var sel=document.getElementById('em-cust');if(!sel)return;
+  sel.innerHTML='<option value="">— pick customer —</option>'+customers.filter(function(c){return c.status==='Active';}).map(function(c){return '<option value="'+c.id+'">'+esc(c.name)+'</option>';}).join('');}
+function onPickCust(){}
+function sendInvite(e){e.preventDefault();
+  var cid=parseInt(document.getElementById('em-cust').value,10);var c=custById(cid);
+  if(!c){toast('Pick a customer first','error');return;}
+  invites.push({id:uid(),customerId:cid,customerName:c.name,service:document.getElementById('em-svc').value,subject:document.getElementById('em-subj').value,stage:'Sent',sentTs:nowTs(),respondedTs:null,scanScore:null});
+  lsSave();toast('Invite sent to '+c.name);renderEmails();
+}
+function saveDraft(){
+  var cid=parseInt(document.getElementById('em-cust').value,10);var c=custById(cid);
+  invites.push({id:uid(),customerId:cid||null,customerName:c?c.name:'(unassigned)',service:document.getElementById('em-svc').value,subject:document.getElementById('em-subj').value,stage:'Draft',sentTs:null,respondedTs:null,scanScore:null});
+  lsSave();toast('Draft saved','info');renderEmails();
+}
+function advance(id){
+  var i=invites.find(function(x){return x.id===id;});if(!i)return;
+  if(i.stage==='Draft'){i.stage='Sent';i.sentTs=nowTs();}
+  else if(i.stage==='Sent'){i.stage='Opened';}
+  else if(i.stage==='Opened'){
+    i.stage='Responded';i.respondedTs=nowTs();
+    var sc=40+Math.floor(Math.random()*55);i.scanScore=sc;
+    var c=custById(i.customerId);
+    if(c){ c.scored=true; c.usagePct=sc; c.staffPct=Math.max(10,sc-10-Math.floor(Math.random()*15));
+      c.readiness=Math.min(100,sc+Math.floor(Math.random()*20)); var n=1+Math.floor(sc/30);
+      c.techs=TECHS.slice(0,Math.min(TECHS.length,n));
+      c.state = sc>=45?'Current user':sc>=25?'Planner':'Non-adopter'; }
+  }
+  lsSave();renderEmails();toast('Lifecycle advanced → '+i.stage,'info');
+}
+function renderEmails(){
+  fillCustSelect();fillServiceSelects();
+  var pills=document.getElementById('email-pills');
+  var by={Draft:0,Sent:0,Opened:0,Responded:0};invites.forEach(function(i){by[i.stage]=(by[i.stage]||0)+1;});
+  pills.innerHTML=Object.keys(by).map(function(k){return '<span class="stat-pill">'+esc(k)+' <b>'+by[k]+'</b></span>';}).join('');
+  var tb=document.getElementById('emails-tbody');
+  var rows=invites.slice().reverse();
+  if(!rows.length){tb.innerHTML='<tr><td colspan="6" class="text-center text-muted py-4">No invites yet.</td></tr>';return;}
+  tb.innerHTML=rows.map(function(i){var canAdv=i.stage!=='Responded';
+    return '<tr><td><strong>'+esc(i.customerName)+'</strong></td><td style="font-size:.79rem;">'+esc(i.subject)+'</td><td style="font-size:.78rem;">'+esc(i.service||'—')+'</td>'+
+      '<td style="font-size:.76rem;white-space:nowrap;">'+(i.sentTs?esc(String(i.sentTs).slice(0,10)):'—')+'</td><td>'+stBadge(i.stage)+'</td>'+
+      '<td class="no-print">'+(canAdv?'<button class="btn btn-sm btn-outline-primary" style="font-size:.68rem;padding:1px 8px;" onclick="advance('+i.id+')"><i class="fas fa-forward me-1"></i>'+(i.stage==='Draft'?'Send':i.stage==='Sent'?'Mark opened':'Mark responded')+'</button>':'<i class="fas fa-check text-success"></i>')+'</td></tr>';
+  }).join('');
+}
+
+function renderTracking(){
+  var sent=invites.filter(function(i){return i.stage!=='Draft';});
+  var opened=invites.filter(function(i){return i.stage==='Opened'||i.stage==='Responded';});
+  var resp=invites.filter(function(i){return i.stage==='Responded';});
+  var f=document.getElementById('funnel');
+  var steps=[['Sent',sent.length,'#059669'],['Opened',opened.length,'#34b97f'],['Responded',resp.length,'#C9A227']];
+  var max=Math.max(1,sent.length);
+  f.innerHTML=steps.map(function(s){var pct=Math.round(s[1]/max*100);
+    return '<div class="funnel-step"><div class="funnel-bar" style="background:'+s[2]+';width:'+Math.max(12,pct)+'%;">'+s[0]+' · '+s[1]+'</div><div class="funnel-meta">'+pct+'% of sent</div></div>';
+  }).join('') + '<div class="text-muted mt-2" style="font-size:.78rem;">Overall response rate: <b style="color:var(--emerald-deep);">'+(sent.length?Math.round(resp.length/sent.length*100):0)+'%</b></div>';
+
+  var bySec={};SECTORS.forEach(function(s){bySec[s]=0;});
+  resp.forEach(function(i){var c=custById(i.customerId);if(c)bySec[c.sector]=(bySec[c.sector]||0)+1;});
+  var labels=SECTORS.filter(function(s){return bySec[s]>0;});
+  mkChart('chart-resp-sector',{type:'bar',data:{labels:labels,datasets:[{label:'Responses',data:labels.map(function(s){return bySec[s];}),backgroundColor:'#059669',borderRadius:3}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{stepSize:1}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+
+  var tb=document.getElementById('track-tbody');
+  if(!sent.length){tb.innerHTML='<tr><td colspan="7" class="text-center text-muted py-4">No invites sent yet.</td></tr>';return;}
+  tb.innerHTML=sent.slice().reverse().map(function(i){var c=custById(i.customerId)||{};
+    return '<tr><td><strong>'+esc(i.customerName)+'</strong></td><td style="font-size:.78rem;">'+esc(c.sector||'—')+'</td>'+
+      '<td style="font-size:.76rem;">'+esc(String(i.sentTs||'').slice(0,10))+'</td><td style="font-size:.76rem;">'+(i.respondedTs?esc(String(i.respondedTs).slice(0,10)):'—')+'</td>'+
+      '<td>'+(i.respondedTs?daysBetween(i.sentTs,i.respondedTs)+'d':'—')+'</td><td>'+stBadge(i.stage)+'</td>'+
+      '<td>'+(i.scanScore!=null?scoreChip(i.scanScore):'<span class="text-muted">—</span>')+'</td></tr>';
+  }).join('');
+}
+
+function renderInsights(){
+  var scored=customers.filter(function(c){return c.scored;});
+  var sent=invites.filter(function(i){return i.stage!=='Draft';}).length;
+  var resp=invites.filter(function(i){return i.stage==='Responded';}).length;
+  var avg=scored.length?Math.round(scored.reduce(function(s,c){return s+calcScore(c);},0)/scored.length):0;
+  var ahead=scored.filter(function(c){return vsBench(c).diff>=5;}).length;
+  var kpis=[['Scans Completed',resp,''],['Response Rate',(sent?Math.round(resp/sent*100):0)+'%','gold'],['Avg Adoption Score',avg,'gold'],['Ahead of Sector',ahead+' / '+scored.length,'']];
+  document.getElementById('insights-kpis').innerHTML=kpis.map(function(k){
+    return '<div class="col-6 col-lg-3"><div class="kpi '+(k[2])+'"><div class="kv">'+k[1]+'</div><div class="kl">'+k[0]+'</div></div></div>';}).join('');
+
+  var bySec={};scored.forEach(function(c){(bySec[c.sector]=bySec[c.sector]||[]).push(c.usagePct||0);});
+  var labels=Object.keys(bySec);
+  mkChart('chart-bench',{type:'bar',data:{labels:labels,datasets:[
+    {label:'Your clients',data:labels.map(function(s){return Math.round(bySec[s].reduce(function(a,b){return a+b;},0)/bySec[s].length);}),backgroundColor:'#059669',borderRadius:3},
+    {label:'Sector benchmark',data:labels.map(function(s){return BENCH[s];}),backgroundColor:'#C9A227',borderRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{beginAtZero:true,ticks:{callback:function(v){return v+'%';}}}}}});
+
+  var tc=TECHS.map(function(t){return scored.filter(function(c){return (c.techs||[]).includes(t);}).length;});
+  mkChart('chart-tech',{type:'polarArea',data:{labels:TECHS,datasets:[{data:tc,backgroundColor:['#059669','#34b97f','#C9A227','#F3E7BE']}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}}}});
+
+  mkChart('chart-barriers',{type:'bar',data:{labels:BARRIERS.map(function(b){return b[0];}),datasets:[{data:BARRIERS.map(function(b){return b[1];}),backgroundColor:'#047857',borderRadius:3}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,max:100,ticks:{callback:function(v){return v+'%';}}},y:{grid:{display:false},ticks:{font:{size:10}}}}}});
+
+  var rd=document.getElementById('readiness-scores');
+  if(!scored.length){rd.innerHTML='<div class="text-muted text-center py-4">No completed scans yet.</div>';}
+  else{rd.innerHTML=scored.slice().sort(function(a,b){return (b.readiness||0)-(a.readiness||0);}).slice(0,7).map(function(c){
+    return '<div class="mb-2"><div class="d-flex justify-content-between" style="font-size:.8rem;"><span>'+esc(c.name)+'</span><strong>'+(c.readiness||0)+'%</strong></div><div class="prog-sm"><div style="width:'+(c.readiness||0)+'%;background:'+scoreColor(c.readiness||0)+';"></div></div></div>';
+  }).join('');}
+}
+
+function renderSupport(){
+  var scored=customers.filter(function(c){return c.scored;});
+  var counts=PHASES.map(function(_,i){return scored.filter(function(c){return phaseFor(calcScore(c))===i;}).length;});
+
+  document.getElementById('phase-cards').innerHTML=PHASES.map(function(p,i){
+    return '<div class="col-md-6 col-lg-3"><div class="svc" style="border-top-color:'+p.color+';height:100%;">'+
+      '<div class="d-flex justify-content-between align-items-center"><h5 style="color:'+p.color+';"><i class="fas '+p.icon+' me-1"></i>'+p.name+'</h5>'+
+      '<span class="score-chip" style="background:'+p.color+';">'+counts[i]+'</span></div>'+
+      '<p class="text-muted" style="font-size:.8rem;min-height:42px;">'+esc(p.desc)+'</p>'+
+      '<div style="font-size:.76rem;color:var(--emerald-deep);"><i class="fas fa-handshake-angle me-1 text-muted"></i>'+esc(p.support)+'</div></div></div>';
+  }).join('');
+
+  mkChart('chart-phases',{type:'bar',data:{labels:PHASES.map(function(p){return p.name;}),datasets:[{data:counts,backgroundColor:PHASES.map(function(p){return p.color;}),borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{stepSize:1}}}}});
+
+  var tb=document.getElementById('support-tbody');
+  if(!scored.length){tb.innerHTML='<tr><td colspan="4" class="text-center text-muted py-4">No completed scans yet — run the demo or send scans to place clients on the policy path.</td></tr>';return;}
+  tb.innerHTML=scored.slice().sort(function(a,b){return calcScore(a)-calcScore(b);}).map(function(c){
+    var sc=calcScore(c),p=PHASES[phaseFor(sc)];
+    return '<tr><td><strong>'+esc(c.name)+'</strong><div class="text-muted" style="font-size:.72rem;">'+esc(c.sector)+'</div></td>'+
+      '<td>'+scoreChip(sc)+'</td>'+
+      '<td><span class="tl" style="color:'+p.color+';"><span class="tl-dot" style="background:'+p.color+';"></span>'+p.name+'</span></td>'+
+      '<td style="font-size:.79rem;">'+esc(p.support)+'</td></tr>';
+  }).join('');
+}
+
+function exportExcel(kind){
+  var data,name;
+  if(kind==='customers'){data=customers.map(function(c){return {Company:c.name,Email:c.email,Sector:c.sector,Size:c.size,State:c.state,Engagement:c.status,Score:c.scored?calcScore(c):'',Usage:c.usagePct,Benchmark:BENCH[c.sector]};});name='customers';}
+  else{data=invites.map(function(i){var c=custById(i.customerId)||{};return {Customer:i.customerName,Sector:c.sector||'',Subject:i.subject,Service:i.service,Stage:i.stage,Sent:i.sentTs,Responded:i.respondedTs,ScanScore:i.scanScore};});name='invites';}
+  if(!data.length){toast('Nothing to export','error');return;}
+  var ws=XLSX.utils.json_to_sheet(data),wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,name);XLSX.writeFile(wb,'adoption-advisory-'+name+'.xlsx');
+  toast('Exported '+name+'.xlsx');
+}
+
+function seedDemo(){
+  if((customers.length||invites.length||services.length) && !confirm('Replace current data with demo dataset?')) return;
+  services=[
+    {id:uid(),name:'AI Readiness Scan',desc:'10-minute survey benchmarking the SME against its sector.',dur:'1 day',price:0,active:true},
+    {id:uid()+1,name:'Sector Benchmark Report',desc:'Detailed positioning vs sector adoption, drivers and barriers.',dur:'1 week',price:1200,active:true},
+    {id:uid()+2,name:'AI Adoption Roadmap',desc:'Prioritised 12-month plan from quick wins to scaled deployment.',dur:'3 weeks',price:4500,active:true},
+    {id:uid()+3,name:'Implementation Sprint',desc:'Hands-on delivery of a first high-impact AI use case.',dur:'6 weeks',price:9800,active:true}
+  ];
+  var seedC=[
+    ['Meridian Software','Information & Communication','Mid'],['Lighthouse Analytics','Information & Communication','Small'],
+    ['Castle Financial','Finance & Real Estate','Large'],['Atlas Property Group','Finance & Real Estate','Mid'],
+    ['Brightwork Consulting','Business Services','Small'],['Vantage HR Partners','Business Services','Micro'],
+    ['Forge Manufacturing','Manufacturing','Mid'],['Northgate Construction','Construction','Mid'],
+    ['Harvest Retail Group','Retail & Distribution','Large'],['CornerShop Collective','Retail & Distribution','Micro'],
+    ['Swift Logistics','Transport & Logistics','Small'],['Bayview Hotels','Hotel & Catering','Mid']
+  ];
+  customers=seedC.map(function(r,idx){return {id:uid()+idx,name:r[0],email:slug(r[0])+'@example.com',sector:r[1],size:r[2],
+    state:'Non-adopter',status:idx%6===5?'Closed':'Active',scored:false,usagePct:0,staffPct:0,techs:[],readiness:0,createdTs:nowTs()};});
+  invites=[];
+  customers.forEach(function(c,idx){
+    if(idx%6===5) return;
+    var stage = idx%5===0?'Sent' : idx%5===1?'Opened' : 'Responded';
+    var sentDate=new Date(Date.now()-(idx+1)*864e5).toISOString();
+    var inv={id:uid()+100+idx,customerId:c.id,customerName:c.name,service:'AI Readiness Scan',subject:'Your complimentary AI Readiness Scan',stage:stage,sentTs:sentDate,respondedTs:null,scanScore:null};
+    if(stage==='Responded'){
+      var b=BENCH[c.sector]; var sc=Math.max(8,Math.min(70, b + (idx%3-1)*9 + Math.floor(Math.random()*8)));
+      inv.respondedTs=new Date(new Date(sentDate).getTime()+ (1+idx%4)*864e5).toISOString(); inv.scanScore=sc;
+      c.scored=true; c.usagePct=sc; c.staffPct=Math.max(8,sc-12); c.readiness=Math.min(100,sc+15);
+      c.techs=TECHS.slice(0,1+Math.floor(sc/22)); c.state = sc>=45?'Current user':sc>=25?'Planner':'Non-adopter';
+    }
+    invites.push(inv);
+  });
+  lsSave(); fillSectorSelects(); updateSbStats();
+  toast('Demo data loaded'); nav('dashboard');
+}
+
+fillSectorSelects(); fillServiceSelects(); fillCustSelect(); updateSbStats(); renderDashboard();
+</script>
+</body>
+</html>
