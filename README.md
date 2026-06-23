@@ -114,19 +114,7 @@ Click **Load Demo Data** on the Dashboard to populate the workbench with a sampl
 
 ---
 
-## Two Versions
-
-This repository ships the workbench in two independently runnable forms:
-
-| Version | Location | Use |
-| --- | --- | --- |
-| **Portfolio** — standalone single file | `index.html` | Drop-in static showcase; opens from `file://` or any static host (GitHub Pages serves it as the index). |
-| **Application** — Laravel (PHP · Blade) | `Workbench/` | Server-rendered version demonstrating routing, controllers and Blade templating. |
-
-Both share the same UI and the same **no-database** model: all client data lives in the browser's
-`localStorage` and is exported via Excel. They share no files, so each can be split into its own repo.
-
-## Laravel (PHP · Blade) Version
+## Laravel (PHP · Blade)
 
 The `Workbench/` app re-implements the workbench as a server-rendered Laravel project. Laravel handles
 routing, controllers and Blade view composition; the client-side engine handles state and rendering.
@@ -160,7 +148,6 @@ Requires PHP 8.3+ and Composer. No database connection is needed (`SESSION_DRIVE
 
 ```
 .
-├── index.html                              # Portfolio version — standalone single-file app
 ├── README.md
 └── Workbench/                              # Application version — Laravel (PHP · Blade)
     ├── app/
