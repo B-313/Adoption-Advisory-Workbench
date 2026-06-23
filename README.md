@@ -17,7 +17,7 @@ The guiding idea: The workbench turns scattered outreach and survey data into a 
 - Each client is placed on a policy-development path with the concrete, publicly-available support for that phase.
 - The prototype stores everything in the browser. No accounts/servers, this is appropriate for SME and  confidentiality-sensitive practice.
 
-### Frameworks (all public, NDA-clean)
+### Frameworks (public)
 
 | Source | Used for |
 | --- | --- |
